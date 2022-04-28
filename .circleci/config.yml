@@ -147,6 +147,6 @@ workflows:
           requires: [build-backend]
       - deploy-infrastructure:
           requires: [test-frontend, test-backend, scan-frontend, scan-backend]
-          filters:ls
+          filters:
             branches:
               only: [main]
