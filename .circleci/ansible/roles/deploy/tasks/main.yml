@@ -1,0 +1,39 @@
+  - name: install rsync on the ansible controller
+    become: yes
+    connection: local
+    package:
+      name: 
+        - openssh
+        - rsync
+      state: present
+      
+  - name: "move files to server"
+    become: yes
+    synchronize:
+      src: /root/project/backend/dist
+      dest: ./udapeople
+      recursive: true
+
+  - name: "move node modules"
+    become: yes
+    synchronize:
+      src: /root/project/backend/node_modules
+      dest: ./udapeople
+      recursive: true
+
+  - name: "run server"
+    become: true
+    command: pm2 start -f ./main.js
+    args:
+      chdir: ./udapeople/dist
+    environment:
+      ENVIRONMENT: production
+      TYPEORM_CONNECTION: "{{ lookup('env', 'TYPEORM_CONNECTION') }}"
+      TYPEORM_MIGRATIONS_DIR: "./migrations"
+      TYPEORM_MIGRATIONS: "./migrations/*.js"
+      TYPEORM_ENTITIES: "./modules/domain/**/*.entity.js"
+      TYPEORM_HOST: "{{ lookup('env', 'TYPEORM_HOST') }}"
+      TYPEORM_PORT: "{{ lookup('env', 'TYPEORM_PORT') }}"
+      TYPEORM_USERNAME: "{{ lookup('env', 'TYPEORM_USERNAME') }}"
+      TYPEORM_PASSWORD: "{{ lookup('env', 'TYPEORM_PASSWORD') }}"
+      TYPEORM_DATABASE: "{{ lookup('env', 'TYPEORM_DATABASE') }}"
