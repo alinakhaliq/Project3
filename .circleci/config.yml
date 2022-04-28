@@ -349,7 +349,7 @@ jobs:
       - image: amazon/aws-cli
     steps:
       - checkout
-    - run:
+      - run:
           name: get old workflow for clean
           command: |
             export OldWorkflowID=$(aws cloudformation \
