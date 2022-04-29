@@ -44,7 +44,6 @@ jobs:
       - run:
           name: Build front-end
           command: |
-            # Your code here
             cd frontend
             npm install
             npm run build
@@ -62,7 +61,6 @@ jobs:
       - run:
           name: Back-end build
           command: |
-            # Your code here
             cd backend
             npm i
             npm run build
@@ -156,7 +154,7 @@ jobs:
           command: |
             BACKEND_AWS_PUBLIC_IP=$(aws ec2 describe-instances \
               --query 'Reservations[*].Instances[*].PublicIpAddress' \
-              --filters "Name=tag:project,Values=udapeople" \
+              --filters "Name=tag:Name,Values=backend-${CIRCLE_WORKFLOW_ID:0:7}" \
               --output text)
             echo "http://$BACKEND_AWS_PUBLIC_IP:3030" >> .circleci/ansible/inventory.txt
             echo "[all]" >> .circleci/ansible/inventory.txt
