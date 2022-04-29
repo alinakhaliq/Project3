@@ -154,11 +154,13 @@ jobs:
       - run:
           name: Add back-end ip to ansible inventory
           command: |
-            aws ec2 describe-instances \
+            BACKEND_AWS_PUBLIC_IP=$(aws ec2 describe-instances \
               --query 'Reservations[*].Instances[*].PublicIpAddress' \
               --filters "Name=tag:project,Values=udapeople" \
-              --output text >> .circleci/ansible/inventory.txt
-            cat .circleci/ansible/inventory.txt
+              --output text)
+            echo "http://$BACKEND_AWS_PUBLIC_IP:3030" >> .circleci/outputs/backend_url.txt
+            echo "[all]" >> .circleci/ansible/inventory.txt
+            echo "$BACKEND_AWS_PUBLIC_IP" >> .circleci/ansible/inventory.txt          
       - persist_to_workspace:
           root: ~/
           paths:
@@ -310,7 +312,7 @@ jobs:
             pwd
             export backend_url=$(curl --insecure https://kvdb.io/8eBNuXaqJ2b5TTPqAc7PUp/migration_${CIRCLE_WORKFLOW_ID:0:7})
             echo $backend_url
-            curl "$backend_url/api/status"
+            curl -s "$backend_url/api/status"
       - run:
           name: Frontend smoke test.
           command: |
