@@ -360,7 +360,7 @@ jobs:
               --stack-status-filter CREATE_COMPLETE --no-paginate --output text))
             printf '%s\n' "${STACKS[@]}"
 
-            if printf '%s\n' "${STACKS[@]}" | grep -q "$OLD_WORKFLOW_ID"; then
+            if printf '%s\n' "${STACKS[@]}" | grep -q "$OLD_WORKFLOW_ID";
             then
               echo "$OldWorkflowID!=$CurrentWorkflowID => will delete old version"
               aws s3 rm "s3://udapeople-${OldWorkflowID}" --recursive
