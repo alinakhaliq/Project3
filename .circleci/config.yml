@@ -362,8 +362,10 @@ jobs:
       - run:
           name: Remove old stacks and files
           command: |
-            OldWorkflowID=$(curl --insecure https://kvdb.io/8eBNuXaqJ2b5TTPqAc7PUp/migration_${CIRCLE_WORKFLOW_ID:0:7})
-            CurrentWorkflowID=${CIRCLE_WORKFLOW_ID:0:7}
+            cat ~/OldWorkflowID.txt
+            OldWorkflowID=$(cat ~/OldWorkflowID.txt)
+            echo OldWorkflowID: "${OldWorkflowID}"
+            echo $OldWorkflowID
             if [[ "$CurrentWorkflowID" != "$OldWorkflowID" ]]
             then
               echo "$OldWorkflowID!=$CurrentWorkflowID => will delete old version"
@@ -373,6 +375,10 @@ jobs:
             else
               echo 'Cannot Cleanup'
             fi
+      - revert-migrations:
+          workflow_id: ${CIRCLE_WORKFLOW_ID:0:7}
+      - destroy-environment:
+          workflow_id: ${CIRCLE_WORKFLOW_ID:0:7}
 
 workflows:
   default:
