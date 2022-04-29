@@ -237,17 +237,20 @@ jobs:
       - run:
           name: Get backend url
           command: |
-            API_URL=$(curl --insecure https://kvdb.io/8eBNuXaqJ2b5TTPqAc7PUp/migration_${CIRCLE_WORKFLOW_ID:0:7})
-            echo $API_URL
-            echo "${API_URL}"
-            echo "NODE_ENV=production" >> frontend/.env
-            echo "API_URL=${API_URL}" >> frontend/.env
+            export BACKEND_AWS_PUBLIC_IP=$(aws ec2 describe-instances \
+              --query 'Reservations[*].Instances[*].PublicIpAddress' \
+              --filters "Name=tag:Name,Values=backend-${CIRCLE_WORKFLOW_ID:0:7}" \
+              --output text)
+            export API_URL="http://${BACKEND_AWS_PUBLIC_IP}:3030"
+            echo "API_URL = ${API_URL}"
+            echo API_URL="http://${BACKEND_IP}:3030" >> frontend/.env
             cat frontend/.env
+            API_URL=$(curl --insecure https://kvdb.io/8eBNuXaqJ2b5TTPqAc7PUp/migration_${CIRCLE_WORKFLOW_ID:0:7})
       - run:
           name: Deploy frontend objects
-          working_directory: ./frontend
           command: |
-            npm i
+            cd frontend
+            npm install
             npm run build
             ls -l
             tar -czvf artifact-"${CIRCLE_WORKFLOW_ID:0:7}".tar.gz dist
