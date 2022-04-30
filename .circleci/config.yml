@@ -286,24 +286,21 @@ jobs:
       - add_ssh_keys:
           fingerprints: ["03:36:b5:95:6a:65:2b:80:ee:7c:d1:ac:20:09:f1:36"]
       - attach_workspace:
-          at: /root
-      - restore_cache:
-          keys:
-            - build-backend
+          at: /~
       - run:
           name: Install dependencies
           command: |
-            apk add --update tar gzip ansible nodejs npm curl openssh-client
-            pip install awscli
+            apk add curl
+            apk add --upgrade bash
+            apk add --update ansible
+            apk add openssh-client
+            pip3 install awscli
       - run:
-          name: Deploy backend
+          name: Configure server
           command: |
-            pwd            
-            tar -C backend -czvf backend_artifact.tar.gz .
-            cd .circleci/ansible
+            cat ~/project/.circleci/ansible/inventory.txt
             export ANSIBLE_HOST_KEY_CHECKING=False
-            ansible-playbook -i inventory.txt deploy-backend.yml
-
+            ansible-playbook -i ~/project/.circleci/ansible/inventory.txt ~/project/.circleci/ansible/configure-server.yml
 
   smoke-test:
     docker:
