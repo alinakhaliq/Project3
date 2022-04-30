@@ -1,16 +1,57 @@
-- name: "Move backend files to server."
-  copy:
-    src: /root/project/backend_artifact.tar.gz
-    dest: ~/home/ubuntu
+- name: "Creates backend app directory"
+   file:
+    path: /home/ubuntu/src
+    state: directory
 
-- name: "install package dependencies"
+- name: "Copy compiled backend app"
+   copy:
+     src: dist.zip
+     dest: "/home/ubuntu/src/dist.zip"
+
+- name: Copy backend files
+  become: true
+  copy:
+    src: backend.tar.gz
+    dest: /home/ubuntu/backend.tar.gz
+
+- name: Start PM2
   shell: |
-    cd ~/home/ubuntu
-    tar -xzvf backend_artifact.tar.gz -C backend
-    rm backend_artifact.tar.gz
-    cd backend/
-    # npm install && npm run build
-    npm audit fix && npm run build
-    cd dist
-    echo `pwd` >> ansible-test.txt
-    pm2 start npm --name backend -- start
+    cd /home/ubuntu/
+    tar xzvf backend.tar.gz
+    # mv home/circleci/project/backend .
+    cd backend
+    sudo npm install -g npm@latest
+    sudo npm install -g webpack-dev-server
+    sudo npm install
+    sudo npm run build
+    sudo pm2 start npm --name backend -- start
+    
+- name: "Unzip backend files to correct directory"
+   shell: |
+    cd /home/ubuntu/src
+    unzip dist.zip
+    rm -rf dist.zip
+    
+- name: "Install dependencies for project"
+    become: yes
+  shell: |
+     cd /home/ubuntu/src
+     npm install
+
+- name: "Executing node"
+  become: yes
+  shell: |
+    export
+    cd /home/ubuntu/src
+    pm2 start main.js
+  register: execute_node
+
+- name: print message
+   become: yes
+   debug:
+     msg: "{{ execute_node.stdout_lines }}"
+
+- name: "Configure pm2 to start as service"
+    become: yes
+  shell: |
+    env PATH=$PATH:/usr/local/bin pm2 startup -u ubuntu
