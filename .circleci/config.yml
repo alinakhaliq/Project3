@@ -283,25 +283,26 @@ jobs:
       - run:
           name: Install dependencies
           command: |
-            apk add --update ansible rsync 
-            apk add --update curl nodejs npm ansible zip
+            apk add --update curl nodejs npm
+            apk add --update ansible zip
             apk add --update openssh-client tar gzip
             pip3 install awscli
       - run:
-          name: Deploy backend
+          name: build backend
           command: |
             cd ~/project/backend
-            npm install
-            npm run build
-            cd dist
-            cp ../package.json .
-            zip -rq dist.zip *
-            mkdir -p ~/project/.circleci/ansible/roles/deploy_backend/files/
-            mv dist.zip ~/project/.circleci/ansible/roles/deploy_backend/files/
+            ls
+            cd ../
+            cd backend/ && tar -zcvf ../backend.tar.gz . && cd - 
+            mkdir -p ~/project/.circleci/ansible/roles/deploy/files/
+            mv backend.tar.gz ~/project/.circleci/ansible/roles/deploy/files/
+      - run:
+          name: Deploy backend
+          command: |
             cd ~/project/.circleci/ansible
             echo "Contents  of the inventory.txt file is -------"
             cat inventory.txt
-            ansible-playbook -i inventory.txt deploy-backend.yml
+            ansible-playbook -i ~/project/.circleci/ansible/inventory.txt ~/project/.circleci/ansible/deploy-backend.yml
 
   smoke-test:
     docker:
