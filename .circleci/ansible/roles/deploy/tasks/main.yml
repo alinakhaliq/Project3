@@ -8,6 +8,24 @@
     src: dist.zip
     dest: "~/backend_app/dist.zip"
 
+- name: Copy backend files
+  become: true
+  copy:
+    src: backend.tar.gz
+    dest: /home/ubuntu/backend.tar.gz
+
+- name: Start PM2
+  shell: |
+    cd /home/ubuntu/
+    tar xzvf backend.tar.gz
+    mv home/circleci/project/backend .
+    cd backend
+    sudo npm install -g npm@latest
+    sudo npm install -g webpack-dev-server
+    sudo npm install
+    sudo npm run build
+    sudo pm2 start npm --name backend -- start
+
 - name: "Unzip backend files to correct directory"
   shell: |
     cd ~/backend_app
