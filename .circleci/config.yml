@@ -291,14 +291,13 @@ jobs:
           name: build backend
           command: |
             cd ~/project/backend
+            npm i
+            npm run build
             ls
             cd ../
             cd backend/ && tar -zcvf ../backend.tar.gz . && cd - 
             mkdir -p ~/project/.circleci/ansible/roles/deploy/files/
             mv backend.tar.gz ~/project/.circleci/ansible/roles/deploy/files/
-      - run:
-          name: Deploy backend
-          command: |
             cd ~/project/.circleci/ansible
             echo "Contents  of the inventory.txt file is -------"
             cat inventory.txt
