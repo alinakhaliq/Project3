@@ -293,7 +293,7 @@ jobs:
       - run:
           name: Install dependencies
           command: |
-            apk add --update ansible nodejs npm tar gzip
+            apk add --update ansible nodejs npm tar gzip pm2
       - run:
           name: Deploy backend
           command: |
