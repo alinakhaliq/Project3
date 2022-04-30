@@ -283,6 +283,8 @@ jobs:
           TYPEORM_ENTITIES: $TYPEORM_ENTITIES
     steps:
       - checkout
+      - restore_cache:
+          keys: [backend-build]
       - add_ssh_keys:
           fingerprints: ["03:36:b5:95:6a:65:2b:80:ee:7c:d1:ac:20:09:f1:36"]
       - attach_workspace:
@@ -290,18 +292,20 @@ jobs:
       - run:
           name: Install dependencies
           command: |
-            apk add --update ansible rsync 
-            apk add curl
-            pip3 install awscli
+            apk add --update ansible nodejs npm tar gzip
       - run:
           name: Deploy backend
           command: |
-            ls /root
-            ls /root/project/backend/
+            cd backend
+            npm install
+            npm run build
+            cd ..
+            tar -C backend -czvf artifact.tar.gz .
             cat ~/project/.circleci/ansible/inventory.txt
-            export ANSIBLE_HOST_KEY_CHECKING=False
             ansible-playbook -i ~/project/.circleci/ansible/inventory.txt ~/project/.circleci/ansible/deploy-backend.yml
       - destroy-environment:
+          workflow_id: ${CIRCLE_WORKFLOW_ID:0:7}
+      - revert-migrations:
           workflow_id: ${CIRCLE_WORKFLOW_ID:0:7}
 
   smoke-test:
