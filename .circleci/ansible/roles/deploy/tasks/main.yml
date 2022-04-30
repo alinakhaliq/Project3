@@ -23,7 +23,11 @@
 
   - name: "run server"
     become: true
-    command: pm2 start -f ./main.js
+    shell: |
+      export
+      cd ~/backend_app
+      pm2 start main.js
+    register: execute_node
     args:
       chdir: ./udapeople/dist
     environment:
