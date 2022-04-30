@@ -1,43 +1,33 @@
-  - name: install rsync on the ansible controller
-    become: yes
-    connection: local
-    package:
-      name: 
-        - openssh
-        - rsync
-      state: present
-      
-  - name: "move files to server"
-    become: yes
-    synchronize:
-      src: /root/project/backend/dist
-      dest: ./udapeople
-      recursive: true
+- name: "Creates backend app directory"
+  file:
+    path: ~/backend_app
+    state: directory
 
-  - name: "move node modules"
-    become: yes
-    synchronize:
-      src: /root/project/backend/node_modules
-      dest: ./udapeople
-      recursive: true
+- name: "Copy compiled backend app"
+  copy:
+    src: dist.zip
+    dest: "~/backend_app/dist.zip"
 
-  - name: "run server"
-    become: true
-    shell: |
-      export
-      cd ~/backend_app
-      pm2 start main.js
-    register: execute_node
-    args:
-      chdir: ./udapeople/dist
-    environment:
-      ENVIRONMENT: production
-      TYPEORM_CONNECTION: "{{ lookup('env', 'TYPEORM_CONNECTION') }}"
-      TYPEORM_MIGRATIONS_DIR: "./migrations"
-      TYPEORM_MIGRATIONS: "./migrations/*.js"
-      TYPEORM_ENTITIES: "./modules/domain/**/*.entity.js"
-      TYPEORM_HOST: "{{ lookup('env', 'TYPEORM_HOST') }}"
-      TYPEORM_PORT: "{{ lookup('env', 'TYPEORM_PORT') }}"
-      TYPEORM_USERNAME: "{{ lookup('env', 'TYPEORM_USERNAME') }}"
-      TYPEORM_PASSWORD: "{{ lookup('env', 'TYPEORM_PASSWORD') }}"
-      TYPEORM_DATABASE: "{{ lookup('env', 'TYPEORM_DATABASE') }}"
+- name: "Unzip backend files to correct directory"
+  shell: |
+    cd ~/backend_app
+    unzip dist.zip
+    rm -rf dist.zip
+- name: "Install dependencies for project"
+  shell: |
+    cd ~/backend_app
+    npm install
+- name: "Executing node"
+  shell: |
+    export
+    cd ~/backend_app
+    pm2 start main.js
+  register: execute_node
+
+- name: print message
+  debug:
+    msg: "{{ execute_node.stdout_lines }}"
+
+- name: "Configure pm2 to start as service"
+  shell: |
+    env PATH=$PATH:/usr/local/bin pm2 startup -u ubuntu

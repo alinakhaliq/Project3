@@ -20,4 +20,7 @@
     TYPEORM_PORT: "{{ lookup('env','TYPEORM_PORT') }}"
     TYPEORM_ENTITIES: "{{ lookup('env','TYPEORM_ENTITIES') }}"
   roles:
-    - deploy
+    - role: weareinteractive.environment
+      become: true
+    - role: deploy
+      become: true
