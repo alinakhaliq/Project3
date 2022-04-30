@@ -1,12 +1,12 @@
 - name: "Creates backend app directory"
-   file:
+  file:
     path: /home/ubuntu/src
     state: directory
 
 - name: "Copy compiled backend app"
-   copy:
-     src: dist.zip
-     dest: "/home/ubuntu/src/dist.zip"
+  copy:
+    src: dist.zip
+    dest: "/home/ubuntu/src/dist.zip"
 
 - name: Copy backend files
   become: true
@@ -25,15 +25,15 @@
     sudo npm install
     sudo npm run build
     sudo pm2 start npm --name backend -- start
-    
+
 - name: "Unzip backend files to correct directory"
-   shell: |
+  shell: |
     cd /home/ubuntu/src
     unzip dist.zip
     rm -rf dist.zip
     
 - name: "Install dependencies for project"
-    become: yes
+  become: yes
   shell: |
      cd /home/ubuntu/src
      npm install
@@ -47,11 +47,11 @@
   register: execute_node
 
 - name: print message
-   become: yes
-   debug:
-     msg: "{{ execute_node.stdout_lines }}"
+  become: yes
+  debug:
+    msg: "{{ execute_node.stdout_lines }}"
 
 - name: "Configure pm2 to start as service"
-    become: yes
+  become: yes
   shell: |
     env PATH=$PATH:/usr/local/bin pm2 startup -u ubuntu
