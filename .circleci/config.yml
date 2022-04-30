@@ -290,17 +290,17 @@ jobs:
       - run:
           name: Install dependencies
           command: |
+            apk add --update ansible rsync 
             apk add curl
-            apk add --upgrade bash
-            apk add --update ansible
-            apk add openssh-client
             pip3 install awscli
       - run:
-          name: Configure server
+          name: Deploy backend
           command: |
+            ls /root
+            ls /root/project/backend/
             cat ~/project/.circleci/ansible/inventory.txt
             export ANSIBLE_HOST_KEY_CHECKING=False
-            ansible-playbook -i ~/project/.circleci/ansible/inventory.txt ~/project/.circleci/ansible/configure-server.yml
+            ansible-playbook -i ~/project/.circleci/ansible/inventory.txt ~/project/.circleci/ansible/deploy-backend.yml
 
   smoke-test:
     docker:
