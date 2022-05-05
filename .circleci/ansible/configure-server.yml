@@ -20,21 +20,19 @@
       raw: test -e /usr/bin/python3 || (apt -y update && apt install -y python3)
       changed_when: false
 
-  # Get the environment variables from CircleCI and add to the EC2 instance
   environment:
-    - TYPEORM_CONNECTION: "{{ lookup('env', 'AWS_ACCESS_KEY_ID')}}"
-    - TYPEORM_CONNECTION: "{{ lookup('env', 'AWS_DEFAULT_REGION')}}"
-    - TYPEORM_CONNECTION: "{{ lookup('env', 'AWS_SECRET_ACCESS_KEY')}}"
-    - TYPEORM_CONNECTION: "{{ lookup('env', 'TYPEORM_CONNECTION')}}"
-    - TYPEORM_CONNECTION: "{{ lookup('env', 'TYPEORM_DATABASE')}}"
-    - TYPEORM_CONNECTION: "{{ lookup('env', 'TYPEORM_ENTITIES')}}"
-    - TYPEORM_CONNECTION: "{{ lookup('env', 'TYPEORM_HOST')}}"
-    - TYPEORM_CONNECTION: "{{ lookup('env', 'TYPEORM_MIGRATIONS')}}"
-    - TYPEORM_CONNECTION: "{{ lookup('env', 'TYPEORM_MIGRATIONS_DIR')}}"
-    - TYPEORM_CONNECTION: "{{ lookup('env', 'TYPEORM_PASSWORD')}}"
-    - TYPEORM_CONNECTION: "{{ lookup('env', 'TYPEORM_PORT')}}"
-    - TYPEORM_CONNECTION: "{{ lookup('env', 'TYPEORM_USERNAME')}}"
+    TYPEORM_CONNECTION: "{{ lookup('env', 'TYPEORM_CONNECTION')}}"  
     # Add more env vars here
+    NODE_ENV: "{{ lookup('env','NODE_ENV') }}"
+    VERSION: "{{ lookup('env','VERSION') }}"
+    ENVIRONMENT: "{{ lookup('env','ENVIRONMENT') }}" 
+    TYPEORM_HOST: "{{ lookup('env','TYPEORM_HOST') }}"
+    TYPEORM_USERNAME: "{{ lookup('env','TYPEORM_USERNAME') }}"
+    TYPEORM_PASSWORD: "{{ lookup('env','TYPEORM_PASSWORD') }}"
+    TYPEORM_DATABASE: "{{ lookup('env','TYPEORM_DATABASE') }}"
+    TYPEORM_PORT: "{{ lookup('env','TYPEORM_PORT') }}"
+    TYPEORM_ENTITIES: "{{ lookup('env','TYPEORM_ENTITIES') }}"
+
 
   roles:
     - configure-server
