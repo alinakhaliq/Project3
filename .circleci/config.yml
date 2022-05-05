@@ -173,6 +173,17 @@ jobs:
   configure-infrastructure:
     docker:
       - image: python:3.7-alpine3.11
+        environment:
+          NODE_ENV: "local"
+          VERSION: "1"
+          ENVIRONMENT: "production"
+          TYPEORM_CONNECTION: $TYPEORM_CONNECTION
+          TYPEORM_HOST: $TYPEORM_HOST
+          TYPEORM_USERNAME: $TYPEORM_USERNAME
+          TYPEORM_PASSWORD: $TYPEORM_PASSWORD
+          TYPEORM_DATABASE: $TYPEORM_DATABASE
+          TYPEORM_PORT: $TYPEORM_PORT
+          TYPEORM_ENTITIES: $TYPEORM_ENTITIES
     steps:
       - checkout
       - add_ssh_keys:
@@ -182,14 +193,19 @@ jobs:
       - run:
           name: Install dependencies
           command: |
+            apk add curl
+            apk add --upgrade bash
             apk add --update ansible
-            cat .circleci/ansible/inventory.txt
+            apk add openssh-client
+            pip3 install awscli
       - run:
           name: Configure server
           command: |
+            ls /root
+            ls /root/project/backend/
             cat ~/project/.circleci/ansible/inventory.txt
             export ANSIBLE_HOST_KEY_CHECKING=False
-            ansible-playbook -i ~/project/.circleci/ansible/inventory.txt ~/project/.circleci/ansible/configure-server.yml --private-key=udacity.pem
+            ansible-playbook -i ~/project/.circleci/ansible/inventory.txt ~/project/.circleci/ansible/configure-server.yml
       - destroy-environment:
           workflow_id: ${CIRCLE_WORKFLOW_ID:0:7}
 
