@@ -1,7 +1,5 @@
----
-
 - name: "configuration play." 
-  hosts: web
+  hosts: all
   user: ubuntu
   gather_facts: false
   vars:
@@ -10,4 +8,3 @@
     - ansible_stdout_callback: yaml
   roles:
     - deploy
-
