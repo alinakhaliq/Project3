@@ -190,17 +190,32 @@ jobs:
       - image: cimg/node:13.8.0
     steps:
       - checkout
-      - restore_cache:
-          keys: [backend-build]
       - attach_workspace:
           at: ~/
+      - run:
+            name: Install dependencies
+            command: |
+              # Your code here
+              apk update
+              apk upgrade
+              apk add unzip 
+              apk add curl
+              /usr/local/bin/python -m pip install --upgrade pip    
+      - run:
+            name: Install node
+            command: |
+              apk add --update nodejs nodejs-npm
+      - run:
+          name: AWS CLI 
+          command: |
+            pip install awscli --upgrade
+            aws --version      
       - run:
           name: Run migrations
           no_output_timeout: 15m
           command: |
             cd backend
             npm install
-            npm run build
             touch migrations_log.txt
             npm run migrations >> migrations_log.txt
             cat migrations_log.txt
