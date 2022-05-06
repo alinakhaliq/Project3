@@ -206,7 +206,58 @@ jobs:
             then 
               curl https://kvdb.io/5orj5ArPVqdDsG8BNg1huJ/migration_${CIRCLE_WORKFLOW_ID:0:7}  -d '1'
             fi
-     
+
+  deploy-frontend:
+    docker:
+      - image: sleavely/node-awscli:14.x
+    steps:
+      - checkout
+      - restore_cache:
+          keys: [frontend-build]
+      - run:
+          name: Install AWS CLI
+          command: |
+            sudo apt-get -y -qq update
+            sudo apt-get -y -qq install python3
+            sudo apt-get -qq install awscli
+      - run:
+          name: Install npm
+          command: |
+            cd frontend
+            sudo npm install webpack-dev-server -g
+            sudo npm install
+      - run:
+          name: Install tar
+          command: |
+            # your code here
+            sudo apt-get update -y
+            sudo apt-get install -y tar
+      - run:
+          name: Get backend url
+          command: |
+            export BACKEND_AWS_PUBLIC_IP=$(aws ec2 describe-instances \
+              --query 'Reservations[*].Instances[*].PublicIpAddress' \
+              --filters "Name=tag:Name,Values=backend-${CIRCLE_WORKFLOW_ID:0:7}" \
+              --output text)
+            export API_URL="http://${BACKEND_AWS_PUBLIC_IP}:3030"
+            echo "API_URL = ${API_URL}"
+            echo API_URL="http://${BACKEND_AWS_PUBLIC_IP}:3030" >> frontend/.env
+            cat frontend/.env
+      - run:
+          name: Deploy frontend objects
+          command: |
+            cd ~/project/frontend
+            npm install
+            npm run build
+            tar -czvf artifact-"${CIRCLE_WORKFLOW_ID:0:7}".tar.gz dist
+            aws s3 cp dist "s3://udapeople-${CIRCLE_WORKFLOW_ID:0:7}" --recursive
+      - persist_to_workspace:
+          root: ~/
+          paths:
+            - project/frontend/dist      
+      - destroy-environment:
+          workflow_id: ${CIRCLE_WORKFLOW_ID:0:7}
+          
 workflows:
   default:
     jobs:
@@ -228,3 +279,5 @@ workflows:
           requires: [deploy-infrastructure]
       - run-migrations:
           requires: [configure-infrastructure]
+      - deploy-frontend:
+          requires: [run-migrations]
