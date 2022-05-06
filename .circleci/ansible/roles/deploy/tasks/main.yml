@@ -1,0 +1,9 @@
+- name: Creates directory
+  file:
+    path: /home/ubuntu/backend/
+    state: directory
+
+- name: Copy backend files
+  copy:
+    src: backend.zip
+    dest: /home/ubuntu/backend/
