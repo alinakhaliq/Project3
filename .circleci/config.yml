@@ -199,6 +199,9 @@ jobs:
           no_output_timeout: 15m
           command: |
             cd backend
+            cat .env
+            npm install
+            npm run build
             touch migrations_log.txt
             npm run migrations >> migrations_log.txt
             cat migrations_log.txt
@@ -210,8 +213,6 @@ jobs:
             then 
               curl https://kvdb.io/5orj5ArPVqdDsG8BNg1huJ/migration_${CIRCLE_WORKFLOW_ID:0:7}  -d '1'
             fi
-      - destroy-environment:
-          workflow_id: "${CIRCLE_WORKFLOW_ID:0:7}"
      
 workflows:
   default:
