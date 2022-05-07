@@ -150,8 +150,6 @@ jobs:
     docker:
       - image: python:3.7-alpine3.11
         environment:
-          NODE_ENV: "local"
-          VERSION: "1"
           ENVIRONMENT: "production"
           TYPEORM_CONNECTION: $TYPEORM_CONNECTION
           TYPEORM_HOST: $TYPEORM_HOST
