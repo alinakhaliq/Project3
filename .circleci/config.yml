@@ -274,6 +274,11 @@ jobs:
           command: |
             apk add --update ansible openssh-client tar gzip
             apk add --update nodejs npm   
+            sudo npm install -g n
+            sudo n latest
+            sudo npm install -g npm
+            hash -d npm
+            npm i
             pip install awscli 
       - run:
           name: Deploy backend
