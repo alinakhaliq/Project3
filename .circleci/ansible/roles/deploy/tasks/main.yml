@@ -2,6 +2,7 @@
   become: true
   apt:
     name: ["nodejs", "npm"]
+    state: latest
     update_cache: yes
 
 - name: "install pm2"
@@ -19,7 +20,7 @@
 
 - name: Copy backend dist files web server
   ansible.builtin.unarchive:
-    src: artifact.tar.gz
+    src: ~/project/artifact.tar.gz
     dest: /home/ubuntu/backend
 
 - name: Uncompress Backend
@@ -33,17 +34,20 @@
     cd /home/ubuntu/backend
     npm install
     npm install --only=dev
+
 - name: Build package
   shell: |
     cd /home/ubuntu/backend
     npm run build
     cat .env
     npm run prestart:prod
+
 - name: Start PM2
   shell: |
     cd /home/ubuntu/backend 
     pm2 stop default
     pm2 start npm --name backend -- start
+    
 - name: start pm2 for dist/main.js
   become: no
   shell: pm2 start main.js
