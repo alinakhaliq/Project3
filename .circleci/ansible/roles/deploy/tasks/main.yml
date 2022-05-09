@@ -1,9 +1,3 @@
----
-- name: "upgrade packages."
-  become: true
-  apt:
-    upgrade: "yes"
-
 - name: "install dependencies."
   become: true
   apt:
@@ -18,24 +12,40 @@
     production: yes
     state: present
 
-- name: create directory
-  become: yes
-  file: 
+- name: Creates directory
+  file:
     path: /home/ubuntu/backend
     state: directory
 
-- name: extract artifact
-  become: yes
-  unarchive:
-    src: ~/project/artifact.tar.gz
-    dest: /home/ubuntu
-    # owner: ubuntu
-    # group: ubuntu
+- name: Copy backend dist files web server
+  ansible.builtin.unarchive:
+    src: artifact.tar.gz
+    dest: /home/ubuntu/backend
+
+- name: Uncompress Backend
+  shell: |
+    cd /home/ubuntu/
+    tar xvzf artifact.tar.gz -C .
+    ls -la
     
-- name: start app
-  become: yes
+- name: Install Node 
   shell: |
     cd /home/ubuntu/backend
     npm install
+    npm install --only=dev
+- name: Build package
+  shell: |
+    cd /home/ubuntu/backend
+    npm run build
+    cat .env
+    npm run prestart:prod
+- name: Start PM2
+  shell: |
+    cd /home/ubuntu/backend 
     pm2 stop default
-    pm2 start npm -- start
+    pm2 start npm --name backend -- start
+- name: start pm2 for dist/main.js
+  become: no
+  shell: pm2 start main.js
+  args:
+    chdir: /home/ubuntu/backend/dist
