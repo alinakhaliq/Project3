@@ -289,6 +289,7 @@ jobs:
             cd backend
             npm install
             npm run build
+            cp package* ./dist
             cd ..
             tar -C backend -czvf artifact.tar.gz .
             BACKEND_AWS_PUBLIC_IP=$(aws ec2 describe-instances \
