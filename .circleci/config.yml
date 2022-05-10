@@ -376,10 +376,8 @@ jobs:
 
   cloudfront-update:
     docker:
-      # Docker image here that supports AWS CLI
       - image: python:3.7-alpine3.11
     steps:
-      # Checkout code from git
       - checkout
       - attach_workspace:
           at: ~/
@@ -398,7 +396,6 @@ jobs:
               --stack-name udapeople-cloudfront \
               --parameter-overrides WorkflowID="${CIRCLE_WORKFLOW_ID:0:7}" \
               --tags project=clouddevopsudapeople &  
-      # Here's where you will add some code to rollback on failure
       - destroy-environment:
           workflow_id: "${CIRCLE_WORKFLOW_ID:0:7}"        
       - revert-migrations:
@@ -408,6 +405,10 @@ jobs:
     docker:
       - image: circleci/node:13.8.0
     steps: 
+      - run:
+          name: Install dependencies
+          command: |
+            pip install awscli
       - run:
           name: Get old stack workflow id
           command: |
@@ -426,16 +427,14 @@ jobs:
           command: |
             if [ ! -z $OldWorkflowID ]
             then
-              echo "I'm HERE !!!"
               aws s3 rm s3://udapeople-${OldWorkflowID} --recursive
               aws s3 rb s3://udapeople-${OldWorkflowID} --force
               aws cloudformation delete-stack --stack-name "udapeople-backend-${OldWorkflowID}"
               aws cloudformation delete-stack --stack-name "udapeople-frontend-${OldWorkflowID}"
-              echo "Stacks deleted succesfully"
+              echo "old stacks deleted succesfully"
             else
-              echo "Fresh New Stacks"
+              echo "New stacks available"
             fi
-      # Here's where you will add some code to rollback on failure
       - destroy-environment:
           workflow_id: "${CIRCLE_WORKFLOW_ID:0:7}"        
       - revert-migrations:
