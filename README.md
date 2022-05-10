@@ -7,7 +7,7 @@ presentation.pdf
 
 urls.txt including:
 https://github.com/alinakhaliq/Project3 [URL01]
-cloud formation, stacks, udapeople-frontend -> outputs[URL02]
+http://udapeople-d554b5c.s3-website-us-east-1.amazonaws.com[URL02]
 
 Screenshots to include:
 Job failed because of compile errors. [SCREENSHOT01]
