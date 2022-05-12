@@ -5,9 +5,7 @@ This project contains:
 
 presentation.pdf
 
-urls.txt including:
-https://github.com/alinakhaliq/Project3 [URL01]
-http://udapeople-d554b5c.s3-website-us-east-1.amazonaws.com[URL02]
+urls.txt
 
 Screenshots to include:
 Job failed because of compile errors. [SCREENSHOT01]
