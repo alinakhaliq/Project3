@@ -249,19 +249,16 @@ jobs:
             sudo apt-get install -y tar
       - run:
           name: Get backend url
+          working_directory: /home/circleci/project/frontend
           command: |
-            export BACKEND_AWS_PUBLIC_IP=$(aws ec2 describe-instances \
-              --query 'Reservations[*].Instances[*].PublicIpAddress' \
-              --filters "Name=tag:Name,Values=backend-${CIRCLE_WORKFLOW_ID:0:7}" \
-              --output text)
-            export API_URL="http://${BACKEND_AWS_PUBLIC_IP}:3030"
-            echo "API_URL = ${API_URL}"
-            echo API_URL="http://${BACKEND_AWS_PUBLIC_IP}:3030" >> frontend/.env
+            sudo chmod -R 777 /usr/local/lib/node_modules
+            touch ".env"
+            BACKENDDNS=$(aws ec2 describe-instances --query 'Reservations[*].Instances[*].PublicDnsName' --filters "Name=tag:Name,Values=backend-${CIRCLE_WORKFLOW_ID:0:7}" --output text)            
+            export API_URL="${BACKENDDNS}:3030"
             
-            echo ENVIRONMENT=production > "frontend/.env"
-            echo NODE_ENV=production >> "frontend/.env"
-
-            cat frontend/.env
+            echo "API_URL=${API_URL}" >> .env
+            echo "${API_URL}"
+            
       - run:
           name: Deploy frontend objects
           command: |
