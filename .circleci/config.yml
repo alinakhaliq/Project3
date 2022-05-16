@@ -17,7 +17,6 @@ commands:
   revert-migrations:
     description: Revert the last migration if successfully run in the current workflow.
     parameters:
-      # Add parameter here
       workflow_id:
         type: string
     steps:
@@ -25,14 +24,12 @@ commands:
           name: Revert migrations
           when: on_fail
           command: |
-            cd ~/project/backend
-            if [[ -f "~/project/.circleci/outputs/db_migration_success" ]]; then
-              npm i
-              npm run migration:revert
-              echo "roll back migration completed"
+            SUCCESS=$(curl --insecure  https://kvdb.io/5orj5ArPVqdDsG8BNg1huJ/migration_<< parameters.workflow_id >>)
+            if(( $SUCCESS==1 )); 
+            then
+            cd backend
+            npm run migrations:revert
             fi
-              echo "Revert migrations finish..."
-
 jobs:
   build-frontend:
     docker:
@@ -401,32 +398,34 @@ jobs:
 
   cleanup:
     docker:
-      - image: amazon/aws-cli
+       - image: amazon/aws-cli
     steps:
-      - checkout
+      - checkout      
       - run:
           name: Remove old stacks and files
-          command: |
-            OLD_WORKFLOW_ID=$(aws cloudformation \
-              list-exports --query "Exports[?Name==\`UdapeopleWorkflowID\`].Value" \
-              --no-paginate --output text)
-            echo "OLD_WORKFLOW_ID: $OLD_WORKFLOW_ID."
-            export STACKS=($(aws cloudformation list-stacks --query "StackSummaries[*].StackName" \
-              --stack-status-filter CREATE_COMPLETE --no-paginate --output text))
-            printf '%s\n' "${STACKS[@]}"
-            if printf '%s\n' "${STACKS[@]}" | grep -q "$OLD_WORKFLOW_ID";
-            then
-              echo "$OldWorkflowID!=$CurrentWorkflowID => will delete old version"
-              aws cloudformation delete-stack --stack-name "udapeople-frontend-${OldWorkflowID}"
-              aws cloudformation delete-stack --stack-name "udapeople-backend-${OldWorkflowID}"
-            else
-              echo 'Cannot Cleanup'
-            fi
-      - revert-migrations:
-          workflow_id: ${CIRCLE_WORKFLOW_ID:0:7}
-      - destroy-environment:
-          workflow_id: ${CIRCLE_WORKFLOW_ID:0:7}
+          command: |       
+            export OldWorkflowID=$(aws cloudformation list-exports --query "Exports[?Name==\`OldWorkflowID\`].Value" --no-paginate --output text)
+            OldWorkflowID=${OldWorkflowID#udapeople-}
+            echo OldWorkflowID: "${OldWorkflowID}"
+            echo CIRCLE_WORKFLOW_ID: "${CIRCLE_WORKFLOW_ID:0:7}"
+                    
+            export STACKS=($(aws cloudformation list-stacks --query "StackSummaries[*].StackName" --stack-status-filter CREATE_COMPLETE --no-paginate --output text))
+            echo Stack names: "${STACKS[@]}"
 
+            if [[ "${STACKS[@]}" =~ "${OldWorkflowID}" ]]
+            then
+                # your code goes here
+                echo "Stack exist, remove....${OldWorkflowID}"
+                echo "s3://udapeople-${OldWorkflowID}"
+                aws s3 rm "s3://udapeople-${OldWorkflowID}" --recursive
+                aws cloudformation delete-stack --stack-name "udapeople-backend-${OldWorkflowID}"
+                aws cloudformation delete-stack --stack-name "udapeople-frontend-${OldWorkflowID}"                            
+            fi
+      - destroy-environment:
+          workflow_id: "${CIRCLE_WORKFLOW_ID:0:7}"        
+      - revert-migrations:
+          workflow_id: "${CIRCLE_WORKFLOW_ID:0:7}"
+          
 workflows:
   default:
     jobs:
