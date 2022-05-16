@@ -413,7 +413,7 @@ jobs:
             export OldWorkflowID=$(aws cloudformation \
             list-exports --query "Exports[?Name==\`WorkflowID\`].Value" \
             --no-paginate --output text)
-            echo "OldWorkflowID: ${OldWorkflowID}"
+            echo OldWorkflowID: "${OldWorkflowID}"
             # Fetch the stack names          
             export STACKS=($(aws cloudformation list-stacks --query "StackSummaries[*].StackName" \
                     --stack-status-filter CREATE_COMPLETE --no-paginate --output text)) 
@@ -460,6 +460,6 @@ workflows:
           requires: [front-end-smoke-test]
       - cloudfront-update:
           requires: [back-end-smoke-test]
-      - cleanup:
-          requires: [cloudfront-update]
+#      - cleanup:
+#          requires: [cloudfront-update]
 
