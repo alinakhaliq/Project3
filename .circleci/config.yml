@@ -262,6 +262,7 @@ jobs:
       - run:
           name: Deploy frontend objects
           command: |
+            echo ENVIRONMENT=production >> frontend/.env
             cd ~/project/frontend
             npm install
             npm run build
@@ -293,6 +294,7 @@ jobs:
       - run:
           name: Deploy backend
           command: |
+            echo ENVIRONMENT=production >> "backend/.env"
             echo TYPEORM_CONNECTION=postgres >> "backend/.env"
             echo TYPEORM_MIGRATIONS_DIR=./src/migrations >> "backend/.env"
             echo TYPEORM_ENTITIES=./src/modules/domain/**/*.entity.ts >> "backend/.env"
